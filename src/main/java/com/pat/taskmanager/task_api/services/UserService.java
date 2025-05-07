@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -29,20 +30,7 @@ public class UserService {
         return taskRepository.findById(id).get();
     }
 
-    //update task
-    public String updateTask(int id, Task task){
-        Task myTask = taskRepository.findById(id).get();
 
-        myTask.setTitle(task.getTitle());
-        myTask.setUser(task.getUser());
-        myTask.setStatus(task.getStatus());
-        myTask.setCreatedAt(task.getCreatedAt());
-        myTask.setDueDate(task.getDueDate());
-
-        taskRepository.save(task);
-
-        return "Your task has been successfully edited";
-    }
 
     //get all tasks
     public List<Task> getAllTasksByUserId(int id){
@@ -59,6 +47,24 @@ public class UserService {
             throw new RuntimeException("no user was found with id: "+name);
         }
         return tasks;
+    }
+
+    //update task
+    public Task updateTask(int userId, int taskId, Task task){
+        User user = userRepository.findById(userId).orElseThrow(()
+                ->  new RuntimeException("User not found"));
+
+        Task targetTask = user.getTasks().stream().filter(t -> t.getTask_id() == taskId).findFirst().orElseThrow(()
+                -> new RuntimeException("No task found with this ID"));
+
+        targetTask.setUser(user);
+        targetTask.setTitle(task.getTitle());
+        targetTask.setStatus(task.getStatus());
+        targetTask.setDueDate(task.getDueDate());
+
+        taskRepository.save(targetTask);
+
+        return task;
     }
 
     //delete task

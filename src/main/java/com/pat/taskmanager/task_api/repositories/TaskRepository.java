@@ -14,4 +14,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
    public Optional<List<Task>> findAllByUserId(int userId);
    @Query("SELECT t FROM Task t WHERE LOWER(t.user.name) = LOWER(:name)")
    public Optional<List<Task>> findAllByName(String name);
+
+   @Query("SELECT t FROM Task t WHERE t.user.id = :userId")
+   public Optional<Task> findByUserId(int userId);
 }

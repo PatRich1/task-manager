@@ -31,4 +31,9 @@ public class UserController {
     public List<Task> getTasksByUserId(@PathVariable String name){
         return userService.getAllTasksByName(name);
     }
+
+    @PutMapping("/updateTask/{userId}/{taskId}")
+    public Task updateUser(@PathVariable int userId, @PathVariable int taskId ,@RequestBody Task task){
+       return userService.updateTask(userId, taskId , task);
+    }
 }
