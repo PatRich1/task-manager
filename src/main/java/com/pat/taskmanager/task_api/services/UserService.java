@@ -44,9 +44,21 @@ public class UserService {
         return "Your task has been successfully edited";
     }
 
-    //get all tasks for a specific user
+    //get all tasks
     public List<Task> getAllTasksByUserId(int id){
-        return taskRepository.findAllByUserId(id);
+        List<Task> tasks = taskRepository.findAllByUserId(id).get();
+        if (tasks.isEmpty()){
+            throw new RuntimeException("no user was found with id: "+id);
+        }
+        return tasks;
+    }
+
+    public List<Task> getAllTasksByName(String name){
+        List<Task> tasks = taskRepository.findAllByName(name).get();
+        if (tasks.isEmpty()){
+            throw new RuntimeException("no user was found with id: "+name);
+        }
+        return tasks;
     }
 
     //delete task

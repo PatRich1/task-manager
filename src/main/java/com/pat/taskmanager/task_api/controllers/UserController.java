@@ -27,4 +27,8 @@ public class UserController {
     public List<Task> getTasksByUserId(@PathVariable int userId){
         return userService.getAllTasksByUserId(userId);
     }
+    @GetMapping("/getAllTasksByName/{name}")
+    public List<Task> getTasksByUserId(@PathVariable String name){
+        return userService.getAllTasksByName(name);
+    }
 }

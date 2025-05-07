@@ -6,9 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Integer> {
    @Query("SELECT t FROM Task t WHERE t.user.id = :userId")
-   public List<Task> findAllByUserId(int userId);
+   public Optional<List<Task>> findAllByUserId(int userId);
+   @Query("SELECT t FROM Task t WHERE LOWER(t.user.name) = LOWER(:name)")
+   public Optional<List<Task>> findAllByName(String name);
 }
