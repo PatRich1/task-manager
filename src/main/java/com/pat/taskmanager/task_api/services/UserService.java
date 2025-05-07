@@ -46,7 +46,7 @@ public class UserService {
 
     //get all tasks for a specific user
     public List<Task> getAllTasksByUserId(int id){
-    return taskRepository.findAllById(Collections.singleton(id));
+        return taskRepository.findAllByUserId(id);
     }
 
     //delete task

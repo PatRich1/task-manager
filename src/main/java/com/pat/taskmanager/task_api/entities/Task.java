@@ -1,5 +1,6 @@
 package com.pat.taskmanager.task_api.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.pat.taskmanager.task_api.enums.TaskStatus;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -17,8 +18,9 @@ public class Task {
     private TaskStatus status;
     private Date dueDate;
     private LocalDateTime createdAt;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = true)
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     @PrePersist
