@@ -36,4 +36,10 @@ public class UserController {
     public Task updateUser(@PathVariable int userId, @PathVariable int taskId ,@RequestBody Task task){
        return userService.updateTask(userId, taskId , task);
     }
+
+    @DeleteMapping("/deleteTask/{userId}/{taskId}")
+    public ResponseEntity deleteTask(@PathVariable int userId, @PathVariable int taskId){
+        userService.deleteTask(userId, taskId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

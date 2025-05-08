@@ -68,8 +68,18 @@ public class UserService {
     }
 
     //delete task
-    public void deleteTaskById(int id){
-        taskRepository.deleteById(id);
+    public void deleteTask(int userId, int taskId){
+        User user = userRepository.findById(userId).orElseThrow(()
+                ->  new RuntimeException("User not found"));
+
+        Optional<Task> targetTask = user.getTasks().stream().filter(t -> t.getTask_id() == taskId).findFirst();
+        if (targetTask.isPresent()){
+            taskRepository.delete(targetTask.get());
+        }
+        else {
+            throw new RuntimeException("Task not found");
+        }
+
     }
 
     public User getUser(int id){
