@@ -1,5 +1,6 @@
 package com.pat.taskmanager.task_api.services;
 
+import com.pat.taskmanager.task_api.encoder.PasswordEncoder;
 import com.pat.taskmanager.task_api.entities.Task;
 import com.pat.taskmanager.task_api.entities.User;
 import com.pat.taskmanager.task_api.repositories.TaskRepository;
@@ -8,29 +9,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UserService {
 
+
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private TaskRepository taskRepository;
-    //create task
-    public Task createTasks(Task task){
-        return taskRepository.save(task);
+
+    public String login(int id , String inputPassword){
+    Optional<User> targetUser =userRepository.findById(id);
+    if (!targetUser.isPresent()){
+        throw new RuntimeException("User not found");
     }
-
-    //read database to retrieve task
-    public Task getTaskById(int id){
-        return taskRepository.findById(id).get();
+    if (inputPassword.equals(targetUser.get().getPassword()) ){
+        return "login successful, "+"welcome "+ targetUser.get().getName();
+    }else throw new RuntimeException("Incorrect password");
     }
-
-
 
     //get all tasks
     public List<Task> getAllTasksByUserId(int id){
@@ -69,10 +69,10 @@ public class UserService {
 
     //delete task
     public void deleteTask(int userId, int taskId){
-        User user = userRepository.findById(userId).orElseThrow(()
-                ->  new RuntimeException("User not found"));
+        Optional<User> user = userRepository.findById(userId);
 
-        Optional<Task> targetTask = user.getTasks().stream().filter(t -> t.getTask_id() == taskId).findFirst();
+        Optional<Task> targetTask = user.get().getTasks().stream()
+                .filter(t -> t.getTask_id() == taskId).findFirst();
         if (targetTask.isPresent()){
             taskRepository.delete(targetTask.get());
         }
@@ -82,37 +82,40 @@ public class UserService {
 
     }
 
+    public void deleteUser(int id){
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            userRepository.deleteById(id);
+        }
+    }
+
     public User getUser(int id){
         return userRepository.findById(id).get();
     }
 
     public String createUser(User userInput){
-        User user = new User();
-        user.setName(userInput.getName());
-        user.setEmail(userInput.getEmail());
-        userRepository.save(user);
+        Optional<User> userSearch = userRepository.findByEmail(userInput.getEmail());
 
-        List<Task> tasks = new ArrayList<>();
-        for (Task task: userInput.getTasks()) {
-            task.setUser(user);
-            tasks.add(task);
+        if (userSearch.isPresent()){
+            throw new RuntimeException("This user/email already exists");
         }
 
-        /*tasks.forEach(task -> {
-            task.setTitle(userInput.getTasks()
-                    .listIterator().next().getTitle());
+                User user = new User();
+                user.setName(userInput.getName());
+                user.setEmail(userInput.getEmail());
+                user.setPassword(userInput.getPassword());
+//        user.setPassword(userInput.getPassword());
+                userRepository.save(user);
 
-            task.setStatus(userInput.getTasks()
-                    .listIterator().next().getStatus());
+                List<Task> tasks = new ArrayList<>();
+                for (Task task : userInput.getTasks()) {
+                    task.setUser(user);
+                    tasks.add(task);
+                }
+                taskRepository.saveAll(tasks);
 
-            task.setDueDate(userInput.getTasks()
-                    .listIterator().next().getDueDate());
+            return "Created user: " + userInput.getName();
 
-            task.setUser(user);
-            tasks.add(task);
-        });*/
-        taskRepository.saveAll(tasks);
-        return "Created user: " + userInput.getName();
     }
 
 }

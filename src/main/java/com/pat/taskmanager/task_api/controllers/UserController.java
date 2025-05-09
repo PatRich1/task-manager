@@ -17,10 +17,15 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @PostMapping("/login/{id}/{password}")
+    public String loginById(@PathVariable int id, @PathVariable String password){
+        return userService.login(id, password);
+
+    }
+
     @PostMapping("/createUser")
-    public ResponseEntity createUser(@RequestBody User user){
-        userService.createUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public String createUser(@RequestBody User user){
+        return userService.createUser(user);
     }
 
     @GetMapping("/getAllTasks/{userId}")
@@ -40,6 +45,12 @@ public class UserController {
     @DeleteMapping("/deleteTask/{userId}/{taskId}")
     public ResponseEntity deleteTask(@PathVariable int userId, @PathVariable int taskId){
         userService.deleteTask(userId, taskId);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @DeleteMapping("/deleteUser/{id}")
+    public ResponseEntity deleteUser(@PathVariable int id){
+        userService.deleteUser(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
