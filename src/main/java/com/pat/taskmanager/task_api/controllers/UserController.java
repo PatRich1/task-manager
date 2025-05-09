@@ -53,4 +53,9 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @DeleteMapping("/deleteAll")
+    public void deleteAllUsers(){
+        userService.deleteAllUsers();
+    }
 }

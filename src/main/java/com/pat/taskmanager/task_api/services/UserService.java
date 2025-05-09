@@ -1,6 +1,6 @@
 package com.pat.taskmanager.task_api.services;
 
-import com.pat.taskmanager.task_api.encoder.PasswordEncoder;
+import com.pat.taskmanager.task_api.encoder.AppConfig;
 import com.pat.taskmanager.task_api.entities.Task;
 import com.pat.taskmanager.task_api.entities.User;
 import com.pat.taskmanager.task_api.repositories.TaskRepository;
@@ -22,12 +22,15 @@ public class UserService {
     @Autowired
     private TaskRepository taskRepository;
 
+    @Autowired
+    private AppConfig appConfig;
+
     public String login(int id , String inputPassword){
     Optional<User> targetUser =userRepository.findById(id);
     if (!targetUser.isPresent()){
         throw new RuntimeException("User not found");
     }
-    if (inputPassword.equals(targetUser.get().getPassword()) ){
+    if (appConfig.encodePassword().matches(inputPassword, targetUser.get().getPassword())){
         return "login successful, "+"welcome "+ targetUser.get().getName();
     }else throw new RuntimeException("Incorrect password");
     }
@@ -89,6 +92,10 @@ public class UserService {
         }
     }
 
+    public void deleteAllUsers(){
+        userRepository.deleteAll();
+    }
+
     public User getUser(int id){
         return userRepository.findById(id).get();
     }
@@ -103,8 +110,7 @@ public class UserService {
                 User user = new User();
                 user.setName(userInput.getName());
                 user.setEmail(userInput.getEmail());
-                user.setPassword(userInput.getPassword());
-//        user.setPassword(userInput.getPassword());
+                user.setPassword(appConfig.encodePassword().encode(userInput.getPassword()));
                 userRepository.save(user);
 
                 List<Task> tasks = new ArrayList<>();
