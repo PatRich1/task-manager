@@ -18,8 +18,8 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/login/{id}/{password}")
-    public String loginById(@PathVariable int id, @PathVariable String password){
-        return userService.login(id, password);
+    public String loginById(@PathVariable String email, @PathVariable String password){
+        return userService.userLogin(email, password);
 
     }
 
@@ -37,7 +37,7 @@ public class UserController {
         return userService.getAllTasksByName(name);
     }
 
-    @PutMapping("/updateTask/{userId}/{taskId}")
+    /*@PutMapping("/updateTask/{userId}/{taskId}")
     public Task updateUser(@PathVariable int userId, @PathVariable int taskId ,@RequestBody Task task){
        return userService.updateTask(userId, taskId , task);
     }
@@ -53,7 +53,7 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-
+*/
     @DeleteMapping("/deleteAll")
     public void deleteAllUsers(){
         userService.deleteAllUsers();

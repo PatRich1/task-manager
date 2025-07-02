@@ -1,11 +1,13 @@
 package com.pat.taskmanager.task_api.services;
 
+import com.pat.taskmanager.task_api.dto.UserResponse;
 import com.pat.taskmanager.task_api.encoder.AppConfig;
 import com.pat.taskmanager.task_api.entities.Task;
 import com.pat.taskmanager.task_api.entities.User;
 import com.pat.taskmanager.task_api.repositories.TaskRepository;
 import com.pat.taskmanager.task_api.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,15 +27,18 @@ public class UserService {
     @Autowired
     private AppConfig appConfig;
 
-    public String login(int id , String inputPassword){
-    Optional<User> targetUser =userRepository.findById(id);
-    if (!targetUser.isPresent()){
-        throw new RuntimeException("User not found");
-    }
-    if (appConfig.encodePassword().matches(inputPassword, targetUser.get().getPassword())){
-        return "login successful, "+"welcome "+ targetUser.get().getName();
-    }else throw new RuntimeException("Incorrect password");
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+//    public String login(int id , String inputPassword){
+//    Optional<User> targetUser =userRepository.findById(id);
+//    if (!targetUser.isPresent()){
+//        throw new RuntimeException("User not found");
+//    }
+//    if (appConfig.encodePassword().matches(inputPassword, targetUser.get().getPassword())){
+//        return "login successful, "+"welcome "+ targetUser.get().getName();
+//    }else throw new RuntimeException("Incorrect password");
+//    }
 
     //get all tasks
     public List<Task> getAllTasksByUserId(int id){
@@ -53,6 +58,7 @@ public class UserService {
     }
 
     //update task
+/*
     public Task updateTask(int userId, int taskId, Task task){
         User user = userRepository.findById(userId).orElseThrow(()
                 ->  new RuntimeException("User not found"));
@@ -69,9 +75,10 @@ public class UserService {
 
         return task;
     }
+*/
 
     //delete task
-    public void deleteTask(int userId, int taskId){
+    /*public void deleteTask(int userId, int taskId){
         Optional<User> user = userRepository.findById(userId);
 
         Optional<Task> targetTask = user.get().getTasks().stream()
@@ -83,22 +90,19 @@ public class UserService {
             throw new RuntimeException("Task not found");
         }
 
-    }
+    }*/
 
-    public void deleteUser(int id){
+    /*public void deleteUser(int id){
         Optional<User> user = userRepository.findById(id);
         if (user.isPresent()) {
             userRepository.deleteById(id);
         }
-    }
+    }*/
 
     public void deleteAllUsers(){
         userRepository.deleteAll();
     }
 
-    public User getUser(int id){
-        return userRepository.findById(id).get();
-    }
 
     public String createUser(User userInput){
         Optional<User> userSearch = userRepository.findByEmail(userInput.getEmail());
@@ -110,7 +114,7 @@ public class UserService {
                 User user = new User();
                 user.setName(userInput.getName());
                 user.setEmail(userInput.getEmail());
-                user.setPassword(appConfig.encodePassword().encode(userInput.getPassword()));
+                user.setPassword(passwordEncoder.encode(userInput.getPassword()));
                 userRepository.save(user);
 
                 List<Task> tasks = new ArrayList<>();
@@ -124,4 +128,17 @@ public class UserService {
 
     }
 
+    public String userLogin(String email, String password) {
+        Optional<User> user = userRepository.findById(email);
+        UserResponse userResponse = new UserResponse();
+        if (user.isPresent()) {
+            if (user.get().getPassword().equals(password)) {
+                userResponse.setName(user.get().getName());
+                userResponse.setTasks(user.get().getTasks());
+            }
+        }else {
+            throw new RuntimeException("Email address doesnt exist: "+email);
+        }
+        return userResponse.toString();
+    }
 }
