@@ -7,16 +7,18 @@ import com.pat.taskmanager.task_api.entities.User;
 import com.pat.taskmanager.task_api.repositories.TaskRepository;
 import com.pat.taskmanager.task_api.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+//@Transactional
 public class UserService {
-
 
     @Autowired
     private UserRepository userRepository;
@@ -30,16 +32,15 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-//    public String login(int id , String inputPassword){
-//    Optional<User> targetUser =userRepository.findById(id);
-//    if (!targetUser.isPresent()){
-//        throw new RuntimeException("User not found");
-//    }
-//    if (appConfig.encodePassword().matches(inputPassword, targetUser.get().getPassword())){
-//        return "login successful, "+"welcome "+ targetUser.get().getName();
-//    }else throw new RuntimeException("Incorrect password");
-//    }
+    private Authentication authentication;
 
+
+    public List<Task> getAllTasksForAunthenticatedUser(int id) throws Exception {
+        User currentUser= userRepository.findById(id)
+                .orElseThrow(() -> new Exception("Username not found: "+ id));
+
+        return currentUser.getTasks();
+    }
     //get all tasks
     public List<Task> getAllTasksByUserId(int id){
         List<Task> tasks = taskRepository.findAllByUserId(id).get();
@@ -104,7 +105,7 @@ public class UserService {
     }
 
 
-    public String createUser(User userInput){
+    public User createUser(User userInput){
         Optional<User> userSearch = userRepository.findByEmail(userInput.getEmail());
 
         if (userSearch.isPresent()){
@@ -124,13 +125,15 @@ public class UserService {
                 }
                 taskRepository.saveAll(tasks);
 
-            return "Created user: " + userInput.getName();
+            return user;
 
     }
 
     public String userLogin(String email, String password) {
-        Optional<User> user = userRepository.findById(email);
+        Optional<User> user = userRepository.findByEmail(email);
         UserResponse userResponse = new UserResponse();
+
+
         if (user.isPresent()) {
             if (user.get().getPassword().equals(password)) {
                 userResponse.setName(user.get().getName());
@@ -140,5 +143,13 @@ public class UserService {
             throw new RuntimeException("Email address doesnt exist: "+email);
         }
         return userResponse.toString();
+    }
+
+    public Task getTask(int userId, int taskId) throws Exception{
+        User user=userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("user "+userId+ "not found."));
+
+        return taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("task "+taskId+ "not found."));
     }
 }

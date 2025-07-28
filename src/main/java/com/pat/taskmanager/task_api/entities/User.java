@@ -1,6 +1,7 @@
 package com.pat.taskmanager.task_api.entities;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,9 +10,14 @@ import java.util.List;
 @Table(name = "users")
 public class User {
 
-    private String name;
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private int id;
+    @Column(nullable = false)
+    private String name;
+    @Column(nullable = false)
     private String email;
+    @Column(nullable = false)
     private String password;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -25,6 +31,14 @@ public class User {
         this.email = email;
         this.password = password;
         this.tasks = new ArrayList<>();
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {
